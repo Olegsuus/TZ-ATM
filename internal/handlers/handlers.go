@@ -3,24 +3,14 @@ package handlers
 import (
 	"TZ-ATM/internal/models"
 	"database/sql"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
 )
 
-func createAccount(db *sql.DB) (*models.Account, error) {
-	id := uuid.New().String()
-	_, err := db.Exec("INSERT INTO accounts (id, balance) VALUES (?, ?)", id, 0)
-	if err != nil {
-		return nil, err
-	}
-	return &models.Account{ID: id, DB: db}, nil
-}
-
 func CreateAccountHandler(db *sql.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		account, err := createAccount(db)
+		account, err := models.CreateAccount(db)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
@@ -35,7 +25,8 @@ func DepositHandler(db *sql.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid amount")
 		}
-		account := &models.Account{ID: accountID, DB: db}
+		account := models.Account{}
+		account.InitAccount(accountID, db)
 
 		resultChan := make(chan error)
 		go func(bankAccount models.BankAccount) {
@@ -46,7 +37,7 @@ func DepositHandler(db *sql.DB) echo.HandlerFunc {
 			} else {
 				resultChan <- nil
 			}
-		}(account)
+		}(&account)
 
 		if err := <-resultChan; err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -65,7 +56,8 @@ func WithdrawHandler(db *sql.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid amount")
 		}
 
-		account := &models.Account{ID: accountID, DB: db}
+		account := models.Account{}
+		account.InitAccount(accountID, db)
 
 		resultChan := make(chan error)
 		go func(bankAccount models.BankAccount) {
@@ -76,7 +68,7 @@ func WithdrawHandler(db *sql.DB) echo.HandlerFunc {
 			} else {
 				resultChan <- nil
 			}
-		}(account)
+		}(&account)
 
 		if err := <-resultChan; err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -89,7 +81,8 @@ func WithdrawHandler(db *sql.DB) echo.HandlerFunc {
 func BalanceHandler(db *sql.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		accountID := c.Param("id")
-		account := &models.Account{ID: accountID, DB: db}
+		account := models.Account{}
+		account.InitAccount(accountID, db)
 
 		resultChan := make(chan *models.BalanceResult)
 		go func(bankAccount models.BankAccount) {
@@ -97,7 +90,7 @@ func BalanceHandler(db *sql.DB) echo.HandlerFunc {
 
 			balance, err := bankAccount.GetBalance()
 			resultChan <- &models.BalanceResult{Balance: balance, Err: err}
-		}(account)
+		}(&account)
 
 		result := <-resultChan
 		if result.Err != nil {
