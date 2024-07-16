@@ -1,0 +1,106 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7879-g0h1-i234j567k89l",
+    "name": "Banking API",
+    "description": "API to simulate bank operations such as creating accounts, depositing, withdrawing, and checking balances.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Account",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/accounts",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "accounts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Deposit Funds",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/accounts/:id/deposit?amount=500",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "accounts",
+            ":id",
+            "deposit"
+          ],
+          "query": [
+            {
+              "key": "amount",
+              "value": "500",
+              "description": "Amount to deposit"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Withdraw Funds",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/accounts/:id/withdraw?amount=200",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "accounts",
+            ":id",
+            "withdraw"
+          ],
+          "query": [
+            {
+              "key": "amount",
+              "value": "200",
+              "description": "Amount to withdraw"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check Balance",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/accounts/:id/balance",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "accounts",
+            ":id",
+            "balance"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
