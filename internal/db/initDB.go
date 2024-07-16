@@ -7,7 +7,7 @@ import (
 )
 
 func InitDB() *sql.DB {
-	db, err := sql.Open("sqlite3", "file:accounts.db?cache=shared&mode=rwc")
+	db, err := sql.Open("sqlite3", "file:storage.db?cache=shared&mode=rwc")
 	if err != nil {
 		log.Fatalf("Error opening database: %v", err)
 	}

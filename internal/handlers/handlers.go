@@ -35,18 +35,18 @@ func DepositHandler(db *sql.DB) echo.HandlerFunc {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid amount")
 		}
+		account := &models.Account{ID: accountID, DB: db}
 
 		resultChan := make(chan error)
-		go func() {
+		go func(bankAccount models.BankAccount) {
 			defer close(resultChan)
-			account := &models.Account{ID: accountID, DB: db}
-			err := account.Deposit(amount)
+			err := bankAccount.Deposit(amount)
 			if err != nil {
 				resultChan <- err
 			} else {
 				resultChan <- nil
 			}
-		}()
+		}(account)
 
 		if err := <-resultChan; err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -65,17 +65,18 @@ func WithdrawHandler(db *sql.DB) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid amount")
 		}
 
+		account := &models.Account{ID: accountID, DB: db}
+
 		resultChan := make(chan error)
-		go func() {
+		go func(bankAccount models.BankAccount) {
 			defer close(resultChan)
-			account := &models.Account{ID: accountID, DB: db}
-			err := account.Withdraw(amount)
+			err := bankAccount.Withdraw(amount)
 			if err != nil {
 				resultChan <- err
 			} else {
 				resultChan <- nil
 			}
-		}()
+		}(account)
 
 		if err := <-resultChan; err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -88,14 +89,15 @@ func WithdrawHandler(db *sql.DB) echo.HandlerFunc {
 func BalanceHandler(db *sql.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		accountID := c.Param("id")
+		account := &models.Account{ID: accountID, DB: db}
 
 		resultChan := make(chan *models.BalanceResult)
-		go func() {
+		go func(bankAccount models.BankAccount) {
 			defer close(resultChan)
-			account := &models.Account{ID: accountID, DB: db}
-			balance, err := account.GetBalance()
+
+			balance, err := bankAccount.GetBalance()
 			resultChan <- &models.BalanceResult{Balance: balance, Err: err}
-		}()
+		}(account)
 
 		result := <-resultChan
 		if result.Err != nil {

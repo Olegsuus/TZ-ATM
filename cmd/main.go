@@ -8,12 +8,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type BankAccount interface {
-	Deposit(amount float64) error
-	Withdraw(amount float64) error
-	GetBalance() (float64, error)
-}
-
 func main() {
 	storage := db.InitDB()
 
